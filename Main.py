@@ -19,6 +19,8 @@ def adicionar_tarefa(tarefas):
     }
 
     tarefas.append(tarefa)
+    salvar_tarefas(tarefas)
+    print(f"Tarefa '{titulo}' adicionada com sucesso.")
 
 
 def listar_tarefas(tarefas):
@@ -59,42 +61,60 @@ def remover_tarefa(tarefas):
 
     print("Tarefa não encontrada.")
 
+def marcar_concluida(tarefas):
+
+    try:
+        id_concluir = int(input("Digite o ID da tarefa a ser marcada como concluída: "))
+    except ValueError:
+        print("ID inválido. Por favor, insira um número.")
+        return
     
-    tarefas = []
+    for tarefa in tarefas:
+        if tarefa["id"] == id_concluir:
+            tarefa["concluida"] = True
+            print(f"Tarefa '{tarefa['titulo']}' marcada como concluída.")
+            return
+    
+    print("Tarefa não encontrada.")
 
-    while True:
-        mostrar_menu()
-        opcao = input("Escolha uma opção: ")
+def salvar_tarefas(tarefas):
+    with open("tarefas.json", "w", encoding="utf-8") as arquivo:
+        json.dump(tarefas, arquivo, indent=4, ensure_ascii=False)
 
-        if opcao == "1":
+def carregar_tarefas():
+    try:
+        with open("tarefas.json", "r", encoding="utf-8") as arquivo:
+            return json.load(arquivo)
+    except FileNotFoundError:
+        return []
 
-            adicionar_tarefa(tarefas)
-            
-        elif opcao == "2":
-            if not tarefas: 
-                print("\nNenhuma tarefa cadastrada.")
-            else:
-                print("\nLista de Tarefas:")
-                for tarefa in tarefas:
+tarefas = carregar_tarefas()
 
-                    status = "Concluída" if tarefa["concluida"] else "Pendente"
+while True:
+    mostrar_menu()
+    opcao = input("Escolha uma opção: ")
 
-                    print(f"ID: {tarefa['id']}, Título: {tarefa['titulo']}, Status: {status}")
-            
-            
-        elif opcao == "3":
+    if opcao == "1":
 
-            print("\nMarcar Tarefa como Concluída")
+        adicionar_tarefa(tarefas)
+        
+    elif opcao == "2":
+        
+        listar_tarefas(tarefas)
 
-        elif opcao == "4":
+    elif opcao == "3":
 
-            print("\nRemover Tarefa")
+        marcar_concluida(tarefas)
 
-        elif opcao == "5":
+    elif opcao == "4":
 
-            print("\nSaindo do Gerenciador de Tarefas. Até logo!")
-            break
+        remover_tarefa(tarefas)
 
-        else:
+    elif opcao == "5":
 
-            print("\nOpção inválida. Por favor, escolha uma opção válida.")
+        print("\nSaindo do Gerenciador de Tarefas. Até logo!")
+        break
+
+    else:
+
+        print("\nOpção inválida. Por favor, escolha uma opção válida.")
