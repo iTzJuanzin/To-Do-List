@@ -8,6 +8,58 @@ def mostrar_menu():
     print("4 - Remover Tarefa")
     print("5 - Sair")
 
+def adicionar_tarefa(tarefas):
+
+    titulo = input("Digite o título da tarefa: ").strip()
+
+    tarefa = {
+        "id": len(tarefas) + 1,
+        "titulo": titulo, 
+        "concluida": False
+    }
+
+    tarefas.append(tarefa)
+
+
+def listar_tarefas(tarefas):
+
+    print("\n" + "-" * 30)
+
+
+    if not tarefas: 
+        print("\nNenhuma tarefa cadastrada.")
+    else:
+        print("\nLista de Tarefas:")
+        for tarefa in tarefas:
+
+            status = "Concluída" if tarefa["concluida"] else "Pendente"
+
+            print(f"ID: {tarefa['id']}, Título: {tarefa['titulo']}, Status: {status}")
+
+    print("-" * 30)
+
+
+def remover_tarefa(tarefas):
+
+    try:
+        id_remover = int(input("Digite o ID da tarefa a ser removida: "))
+    except ValueError:
+        print("ID inválido. Por favor, insira um número.")
+        return  
+
+    for tarefa in tarefas:
+        if tarefa["id"] == id_remover:
+            tarefas.remove(tarefa)
+            print(f"Tarefa '{tarefa['titulo']}' removida com sucesso.")
+    
+        for i, t in enumerate(tarefas, start=1):
+                t["id"] = i
+            
+        return
+
+    print("Tarefa não encontrada.")
+
+    
     tarefas = []
 
     while True:
@@ -16,11 +68,19 @@ def mostrar_menu():
 
         if opcao == "1":
 
-            print("\nAdicionar Tarefa")
-
+            adicionar_tarefa(tarefas)
+            
         elif opcao == "2":
+            if not tarefas: 
+                print("\nNenhuma tarefa cadastrada.")
+            else:
+                print("\nLista de Tarefas:")
+                for tarefa in tarefas:
 
-            print("\nListar Tarefas")
+                    status = "Concluída" if tarefa["concluida"] else "Pendente"
+
+                    print(f"ID: {tarefa['id']}, Título: {tarefa['titulo']}, Status: {status}")
+            
             
         elif opcao == "3":
 
@@ -36,5 +96,5 @@ def mostrar_menu():
             break
 
         else:
-            
+
             print("\nOpção inválida. Por favor, escolha uma opção válida.")
