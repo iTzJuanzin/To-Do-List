@@ -8,12 +8,17 @@ def mostrar_menu():
     print("4 - Remover Tarefa")
     print("5 - Sair")
 
+def gerar_id(tarefas):
+    if not tarefas:
+        return 1 
+    return max(t["id"] for t in tarefas) + 1
+
 def adicionar_tarefa(tarefas):
 
     titulo = input("Digite o título da tarefa: ").strip()
 
     tarefa = {
-        "id": len(tarefas) + 1,
+        "id": gerar_id(tarefas),
         "titulo": titulo, 
         "concluida": False
     }
@@ -34,7 +39,7 @@ def listar_tarefas(tarefas):
         print("\nLista de Tarefas:")
         for tarefa in tarefas:
 
-            status = "Concluída" if tarefa["concluida"] else "Pendente"
+            status = "Concluída ✅" if tarefa["concluida"] else "Pendente ⏳"
 
             print(f"ID: {tarefa['id']}, Título: {tarefa['titulo']}, Status: {status}")
 
@@ -51,15 +56,13 @@ def remover_tarefa(tarefas):
 
     for tarefa in tarefas:
         if tarefa["id"] == id_remover:
-            tarefas.remove(tarefa)
+            tarefas.remove(tarefa)    
+            salvar_tarefas(tarefas)
             print(f"Tarefa '{tarefa['titulo']}' removida com sucesso.")
-    
-        for i, t in enumerate(tarefas, start=1):
-                t["id"] = i
-            
-        return
+            return
 
     print("Tarefa não encontrada.")
+
 
 def marcar_concluida(tarefas):
 
@@ -72,21 +75,27 @@ def marcar_concluida(tarefas):
     for tarefa in tarefas:
         if tarefa["id"] == id_concluir:
             tarefa["concluida"] = True
+            salvar_tarefas(tarefas)
             print(f"Tarefa '{tarefa['titulo']}' marcada como concluída.")
             return
     
     print("Tarefa não encontrada.")
 
+
 def salvar_tarefas(tarefas):
+
     with open("tarefas.json", "w", encoding="utf-8") as arquivo:
         json.dump(tarefas, arquivo, indent=4, ensure_ascii=False)
 
+
 def carregar_tarefas():
+
     try:
         with open("tarefas.json", "r", encoding="utf-8") as arquivo:
             return json.load(arquivo)
     except FileNotFoundError:
         return []
+    
 
 tarefas = carregar_tarefas()
 
