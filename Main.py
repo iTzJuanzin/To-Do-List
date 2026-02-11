@@ -8,116 +8,99 @@ def mostrar_menu():
     print("4 - Remover Tarefa")
     print("5 - Sair")
 
-def gerar_id(tarefas):
-    if not tarefas:
-        return 1 
-    return max(t["id"] for t in tarefas) + 1
 
-def adicionar_tarefa(tarefas):
+class Tarefa:
+    def __init__(self, id, titulo):
+        self.id = id
+        self.titulo = titulo
+        self.concluida = False
 
-    titulo = input("Digite o título da tarefa: ").strip()
+    def marcar_concluida(self):
+        self.concluida = True
 
-    tarefa = {
-        "id": gerar_id(tarefas),
-        "titulo": titulo, 
-        "concluida": False
-    }
+    def __str__(self):
+        status = "Concluída" if self.concluida else "Pendente"
+        return f"ID: {self.id}, Título: {self.titulo}, Status: {status}"
+            
+class GerenciadorTarefas:
+    def __init__(self):
+        self.tarefas = []
+        self.proximo_id = 1
+        self.carregar_tarefas()
 
-    tarefas.append(tarefa)
-    salvar_tarefas(tarefas)
-    print(f"Tarefa '{titulo}' adicionada com sucesso.")
+    def adicionar_tarefa(self, titulo):
+        tarefa = Tarefa(self.proximo_id, titulo)
+        self.tarefas.append(tarefa)
+        self.proximo_id += 1
+        self.salvar_tarefas()
 
-
-def listar_tarefas(tarefas):
-
-    print("\n" + "-" * 30)
-
-
-    if not tarefas: 
-        print("\nNenhuma tarefa cadastrada.")
-    else:
-        print("\nLista de Tarefas:")
-        for tarefa in tarefas:
-
-            status = "Concluída ✅" if tarefa["concluida"] else "Pendente ⏳"
-
-            print(f"ID: {tarefa['id']}, Título: {tarefa['titulo']}, Status: {status}")
-
-    print("-" * 30)
-
-
-def remover_tarefa(tarefas):
-
-    try:
-        id_remover = int(input("Digite o ID da tarefa a ser removida: "))
-    except ValueError:
-        print("ID inválido. Por favor, insira um número.")
-        return  
-
-    for tarefa in tarefas:
-        if tarefa["id"] == id_remover:
-            tarefas.remove(tarefa)    
-            salvar_tarefas(tarefas)
-            print(f"Tarefa '{tarefa['titulo']}' removida com sucesso.")
+    def listar_tarefas(self):
+        if not self.tarefas:
+            print("Nenhuma tarefa cadastrada.")
             return
-
-    print("Tarefa não encontrada.")
-
-
-def marcar_concluida(tarefas):
-
-    try:
-        id_concluir = int(input("Digite o ID da tarefa a ser marcada como concluída: "))
-    except ValueError:
-        print("ID inválido. Por favor, insira um número.")
-        return
+        for tarefa in self.tarefas:
+            print(tarefa)
     
-    for tarefa in tarefas:
-        if tarefa["id"] == id_concluir:
-            tarefa["concluida"] = True
-            salvar_tarefas(tarefas)
-            print(f"Tarefa '{tarefa['titulo']}' marcada como concluída.")
-            return
-    
-    print("Tarefa não encontrada.")
+    def remover_tarefa(self, id_tarefa):
+        for tarefa in self.tarefas:
+            if tarefa.id == id_tarefa:
+                self.tarefas.remove(tarefa)
+                self.salvar_tarefas()
+                return
+        print("Tarefa não encontrada.")
 
+    def marcar_concluida(self, id_tarefa):
+        for tarefa in self.tarefas:
+            if tarefa.id == id_tarefa:
+                tarefa.marcar_concluida()
+                self.salvar_tarefas()
+                return
+        print("Tarefa não encontrada.")
 
-def salvar_tarefas(tarefas):
+    def salvar_tarefas(self):
+        with open("tarefas.json", "w", encoding="utf-8") as f:
+            json.dump(
+                [t.__dict__ for t in self.tarefas],
+                f,
+                indent=4,
+                ensure_ascii=False
+            )
 
-    with open("tarefas.json", "w", encoding="utf-8") as arquivo:
-        json.dump(tarefas, arquivo, indent=4, ensure_ascii=False)
-
-
-def carregar_tarefas():
-
-    try:
-        with open("tarefas.json", "r", encoding="utf-8") as arquivo:
-            return json.load(arquivo)
-    except FileNotFoundError:
-        return []
-    
-
-tarefas = carregar_tarefas()
+    def carregar_tarefas(self):
+        try:
+            with open("tarefas.json", "r", encoding="utf-8") as f:
+                dados = json.load(f)
+                for t in dados:
+                    tarefa = Tarefa(t["id"], t["titulo"], t["concluida"])
+                    self.tarefas.append(tarefa) 
+                if self.tarefas:
+                    self.proximo_id = max(t.id for t in self.tarefas) + 1
+        except FileNotFoundError:
+            pass
+            
+gerenciador = GerenciadorTarefas()
 
 while True:
     mostrar_menu()
     opcao = input("Escolha uma opção: ")
 
     if opcao == "1":
-
-        adicionar_tarefa(tarefas)
+        titulo = input("Digite o título da tarefa: ")
+        gerenciador.adicionar_tarefa(titulo)
         
     elif opcao == "2":
         
-        listar_tarefas(tarefas)
+        gerenciador.listar_tarefas()
 
     elif opcao == "3":
 
-        marcar_concluida(tarefas)
+        id_tarefa = int(input("Digite o ID da tarefa a ser marcada como concluída: "))
+        gerenciador.marcar_concluida(id_tarefa)
 
     elif opcao == "4":
 
-        remover_tarefa(tarefas)
+        id_tarefa = int(input("Digite o ID da tarefa a ser removida: "))
+        gerenciador.remover_tarefa(id_tarefa)
 
     elif opcao == "5":
 
